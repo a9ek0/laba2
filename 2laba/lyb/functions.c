@@ -180,7 +180,7 @@ void stack_to_lyb(Stack *stack, Library *lyb) {
         lyb->words = (replacement_words *) realloc(lyb->words, lyb->num_of_words * sizeof(replacement_words));
         lyb->words[i].word1 = (char *) malloc(sizeof(char));
         lyb->words[i].word2 = NULL;
-        lyb->words[i].word1 = strdup(buff_data->name);
+        lyb->words[i].word1 = _strdup(buff_data->name);
         i++;
         free(buff_data->name);
     }
@@ -193,7 +193,7 @@ void stack_to_lyb(Stack *stack, Library *lyb) {
             if (buff_data->frequency > 2 &&
                 strlen(lyb->words[i].word1) * buff_data->frequency + strlen(buff_data->name) <
                 strlen(buff_data->name) * buff_data->frequency + strlen(lyb->words[i].word1)) {
-                lyb->words[j].word2 = strdup(buff_data->name);
+                lyb->words[j].word2 = _strdup(buff_data->name);
                 free(buff_data->name);
                 break;
             }
@@ -318,7 +318,7 @@ void copy_data(Data *dest_data, const Data *source_data)
     if(dest_data == NULL || source_data == NULL)
         exit(EXIT_FAILURE);
     dest_data->name = (char*) malloc(strlen(source_data->name) + 1);
-    strcpy(dest_data->name, source_data->name);
+    strcpy_s(dest_data->name, MAX_WORD_LEN, source_data->name);
     dest_data->name[strlen(source_data->name) + 1] = '\0';
     dest_data->frequency = source_data->frequency;
 }
@@ -343,7 +343,7 @@ void text_to_stack(const char *name, Stack *stack) {
     FILE *f;
     char word[MAX_WORD_LEN];
     const char *cleaned_word;
-    f = fopen(name, "r");
+    fopen_s(&f, name, "r");
     if (f == NULL) {
         printf("Error opening file!\n");
         return;
@@ -368,7 +368,7 @@ void text_to_stack(const char *name, Stack *stack) {
         if (is_new_word) {
             data = (Data*) malloc(sizeof(Data));
             data->name = (char*) malloc(strlen(cleaned_word) + 1);
-            strcpy(data->name, cleaned_word);
+            strcpy_s(data->name, MAX_WORD_LEN, cleaned_word);
             data->frequency = 1;
             push(stack, data);
         }
@@ -382,12 +382,12 @@ void copy_file(const char *source_filename, const char *destination_filename) {
     char buffer[1024];
     size_t bytes_read;
 
-    source_file = fopen(source_filename, "rb");
+    fopen_s(&source_file, source_filename, "rb");
     if (source_file == NULL) {
         return;
     }
 
-    destination_file = fopen(destination_filename, "wb");
+    fopen_s(&destination_file, destination_filename, "wb");
     if (destination_file == NULL) {
         fclose(source_file);
         return;
@@ -450,7 +450,7 @@ void initialize_lyb(Library *lyb) {
 void put_lyb_to_file(const char *file_name, const Library *lyb)
 {
     FILE *f;
-    f = fopen(file_name, "at");
+    fopen_s(&f, file_name, "at");
     if(f == NULL)
         return;
     fputs("\n", f);
@@ -474,13 +474,13 @@ void compress_file(const char *input_file, const char* output_file, const Librar
 
     FILE *fr;
 
-    fr = fopen(input_file, "rt");
+    fopen_s(&fr, input_file, "rt");
     if(fr == NULL)
         return;
 
     FILE *fw;
 
-    fw = fopen(output_file, "wt+");
+    fopen_s(&fw, output_file, "wt+");
     if(fw == NULL) {
         fclose(fr);
         return;
@@ -491,9 +491,9 @@ void compress_file(const char *input_file, const char* output_file, const Librar
     int flag = 1;
     check_control_chars(fr, fw);
 
-    while(fscanf(fr, "%50s", word) == 1)
+    while(fscanf_s(fr, "%50s", word) == 1)
     {
-        strcpy(tmp_word, word);
+        strcpy_s(tmp_word, MAX_WORD_LEN, word);
         cleaned_word = dell_punct_marks(word);
         flag = 1;
         for (int i = 0; i < lyb->num_of_words - 1; ++i) {
