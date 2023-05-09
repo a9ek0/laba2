@@ -350,7 +350,7 @@ void text_to_stack(const char *name, Stack *stack) {
     }
     Data *data;
     int is_new_word;
-    while (fscanf(f, "%50s", word) == 1) {
+    while (fscanf_s(f, "%50s", word) == 1) {
         cleaned_word = dell_punct_marks(word);
         if (strlen(cleaned_word) == 0) {
             continue;
